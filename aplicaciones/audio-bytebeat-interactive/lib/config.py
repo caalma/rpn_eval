@@ -30,8 +30,9 @@ SESSION_FOLDER = './sesiones_grabadas/'
 SESSION_SPEED = 1.0
 
 FFPLAY_PROGRAM_BIN = 'ffplay'
-AUDPV_PROGRAM_BIN = '../../extra/audpv'
+AUDPV_PROGRAM_BIN = '../../../../audpv/bin/audpv'
 PLAYER_VISUALIZER_SOFTWARE = 'audpv'
+
 
 # Sesión
 SESSION_AUTOSAVE = True
