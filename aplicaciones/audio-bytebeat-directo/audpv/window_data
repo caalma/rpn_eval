@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# Nombre de la ventana a capturar
+WINDOW_NAME="$1"
+
+# Obtener información de la ventana con xwininfo
+XWININFO_OUTPUT=$(xwininfo -name "$WINDOW_NAME" 2>/dev/null)
+
+# Verificar si la ventana existe
+if ! echo "$XWININFO_OUTPUT" | grep -q "xwininfo: Window id:"; then
+  echo "Error: La ventana '$WINDOW_NAME' no fue encontrada."
+  exit 1
+fi
+
+# Extraer valores con awk y expresiones regulares
+X=$(echo "$XWININFO_OUTPUT" | awk '/Absolute upper-left X:/ {print $4}')
+Y=$(echo "$XWININFO_OUTPUT" | awk '/Absolute upper-left Y:/ {print $4}')
+WIDTH=$(echo "$XWININFO_OUTPUT" | awk '/Width:/ {print $2}')
+HEIGHT=$(echo "$XWININFO_OUTPUT" | awk '/Height:/ {print $2}')
+
+# Verificar que todos los valores se hayan obtenido correctamente
+if [ -z "$X" ] || [ -z "$Y" ] || [ -z "$WIDTH" ] || [ -z "$HEIGHT" ]; then
+  echo "Error: No se pudieron extraer las dimensiones de la ventana."
+  exit 1
+fi
+
+# Mostrar valores obtenidos (opcional)
+echo "Valores extraídos:"
+echo "X: $X, Y: $Y"
+echo "Width: $WIDTH, Height: $HEIGHT"

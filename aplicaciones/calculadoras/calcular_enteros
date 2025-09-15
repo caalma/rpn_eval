@@ -1,0 +1,7 @@
+#!/bin/bash
+# -*- coding:utf-8 -*-
+
+program_name='calc_i'
+program_mode='ci'
+
+source calcular

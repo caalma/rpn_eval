@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# Configuración
+TEXTO_REEMPLAZO="$1"
+PLANTILLA_ORIGINAL="overlay_template.svg"
+PLANTILLA_MODIFICADA="overlay_code.svg"
+ARCHIVO_PNG="overlay_code.png"
+DPI=96
+MARCADOR="__CODIGO__"
+
+# 1. Copiar la plantilla y reemplazar el marcador
+./overlay_replace "$PLANTILLA_ORIGINAL" "$MARCADOR" "$TEXTO_REEMPLAZO" > "$PLANTILLA_MODIFICADA"
+
+# 2. Exportar a PNG con Inkscape
+# Asegúrate de que Inkscape esté instalado: sudo apt install inkscape
+inkscape "$PLANTILLA_MODIFICADA" --export-filename="$ARCHIVO_PNG" --export-dpi="$DPI" --export-area-page
+
+# 3. Limpiar archivos temporales (opcional)
+#rm "$PLANTILLA_MODIFICADA"
+
+echo "¡Listo! El archivo $ARCHIVO_PNG ha sido generado con éxito."

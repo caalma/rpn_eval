@@ -1,0 +1,7 @@
+#!/bin/bash
+# -*- coding:utf-8 -*-
+
+program_name='calc_f'
+program_mode='cf'
+
+source calcular

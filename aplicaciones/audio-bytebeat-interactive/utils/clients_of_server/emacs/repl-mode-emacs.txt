@@ -1,0 +1,54 @@
+-------------------------- Atajos de teclado
+C-x C-e    Avtivar cliente.
+M-Enter    Evaluar expresiones.
+           Línea única: posisionado sobre la línea a evaluar.
+           Multilinea: seleccionando las líneas a evaluar.
+C-g        Desbloquear tras expresiones fallidas.
+
+-------------------------- REPL - CLIENTE
+
+(progn
+  (setq cmd "../python/directo.py sin_respuesta")
+  (repl-mode-activate cmd)
+  (setq repl-mode-result "") ; opcional "\n"
+  (setq repl-mode-history-enabled nil)
+  (setq repl-mode-strip-result t)
+  (setq repl-mode-quote-input t)
+  (setq repl-mode-use-stdin nil)
+  )
+
+-------------------------- BB - Operadores de expresiones
++ - * / %
+<< >> & | ^ ~
+&& || == != <= >= < >
+dup swap put drop pick only
+
+-------------------------- BB - Comandos de server
+--               -- comments
+??               -- help
+..               -- end_session_1
+cc               -- clear_console
+set_rate         -- set_rate
+set_t            -- set_t
+get_t            -- get_t
+reset_v          -- reset_visual
+compose_v        -- compose_visual
+save_session     -- save_session
+load_session     -- load_session
+play_session     -- play_session
+set_speed        -- set_speed
+show_session     -- show_session
+list_sessions    -- list_sessions
+empty_session    -- empty_session
+delete_si        -- delete_session_item
+preserve_si      -- preserve_session_item
+__               -- dev_test
+
+
+
+-------------------------- Ejemplo de comandos y expresiones bytebeat
+0 set_t
+
+t
+t 8 /
+t 31 / t 13 / >>

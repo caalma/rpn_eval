@@ -1,0 +1,44 @@
+#!/bin/bash
+# -*- coding:utf-8 -*-
+
+bb_code="$1"
+bb_t_init="$2"
+bb_rate="$3"
+bb_modo="$4"
+filename="$5"
+
+if [[ "" == "$filename" ]]; then
+    echo -e "ERROR. Requiere varios argumentos."
+    echo
+    echo -e "Emisor de audio de estilo bytebeat, mediantes expresion RPN."
+    echo -e "Modo de uso:"
+    echo -e "    $0 <bb_code> [bb_t_init] [bb_rate] [bb_modo] [filename]"
+    echo
+    echo -e "bb_code         es una expresión rpn válida obligatoria. En dicha expresión se referencia el valor del tiempo actual en la variable t."
+    echo -e "bb_t_init       es un entero positivo para el iniciar t. Es opcional y por defecto es 0."
+    echo -e "bb_rate         es un entero positivo para setear el sample-rate. Es opcional y por defecto es 8000"
+    echo -e "bb_modo         puede ser 'i' o 'f', para indicar si se utilizará el evaluador de enteros o de punto flotante. Es opcional y por defecto es 'i'."
+    echo -e "filename        nombre del archivo en que se grabará. La extensión determina el formato."
+    echo
+    echo -e "Por ejemplo:"
+    echo -e "    $0 't 5 >> t 7 >> - t t * &' 0 8000 i"
+    exit 1
+fi
+
+bin_folder='../../base/bin'
+program_name='audio_rpn_i'
+program_mode='ai'
+
+if [[ $bb_modo == "f" ]]; then
+    program_name='audio_rpn_f'
+    program_mode='af'
+fi
+
+#make -C $(dirname $bin_folder) -s mode bb_modo=$program_mode
+#if [ $? -ne 0 ]; then
+#    echo "Error: La compilación falló."
+#    exit 1
+#fi
+
+echo "USANDO ---> $program_name"
+"${bin_folder}/${program_name}" "${bb_code}" "${bb_t_init}" | ffmpeg -hide_banner -f s16le -ar "${bb_rate}" -ac 1 -i - "${filename}"

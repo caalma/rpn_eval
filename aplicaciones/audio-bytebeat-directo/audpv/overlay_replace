@@ -1,0 +1,30 @@
+#!/usr/bin/env python3
+# -*- coding:utf-8 -*-
+
+from sys import argv
+
+
+def convert_codbb_to_entities(text):
+    ree = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+
+        }
+    for k, v in ree.items():
+        if k in ree:
+            text = text.replace(k,v)
+    return text
+
+
+if __name__ == "__main__":
+    if len(argv) == 4:
+        template = argv[1]
+        marcador = argv[2]
+        code = convert_codbb_to_entities(argv[3])
+
+        with open(template, 'r') as f:
+            text = f.read()
+            text_modificado = text.replace(marcador, code)
+
+            print(text_modificado)

@@ -1,0 +1,104 @@
+#!/bin/bash
+
+bb_code="$1"
+bb_t_init="$2"
+bb_rate="$3"
+bb_modo="$4"
+filename=$(./codebb-to-name "$bb_code")"--${bb_t_init}-${bb_rate}-${bb_modo}"
+
+if [[ "" == "$filename" ]]; then
+    echo -e "ERROR. Requiere varios argumentos."
+    echo
+    echo -e "Emisor de audio de estilo bytebeat, mediantes expresion RPN."
+    echo -e "Modo de uso:"
+    echo -e "    $0 <bb_code> [bb_t_init] [bb_rate] [bb_modo] [filename]"
+    echo
+    echo -e "bb_code         es una expresión rpn válida obligatoria. En dicha expresión se referencia el valor del tiempo actual en la variable t."
+    echo -e "bb_t_init       es un entero positivo para el iniciar t. Es opcional y por defecto es 0."
+    echo -e "bb_rate         es un entero positivo para setear el sample-rate. Es opcional y por defecto es 8000"
+    echo -e "bb_modo         puede ser 'i' o 'f', para indicar si se utilizará el evaluador de enteros o de punto flotante. Es opcional y por defecto es 'i'."
+    echo
+    echo -e "Por ejemplo:"
+    echo -e "    $0 't 5 >> t 7 >> - t t * &' 0 8000 i"
+    exit 1
+fi
+
+bin_folder='../../../base/bin'
+program_name='audio_rpn_i'
+program_mode='ai'
+
+pv_folder='../../../../../audpv/base/bin/'
+pv_program_name='audpv'
+
+if [[ $bb_modo == "f" ]]; then
+    program_name='audio_rpn_f'
+    program_mode='af'
+fi
+
+# Crear FIFO para el audio
+fifo="/dev/shm/audio_buffer"
+mkfifo "$fifo"
+
+# Función para limpiar el FIFO al salir
+cleanup() {
+    rm -f "$fifo"
+}
+trap cleanup EXIT
+
+# 1. Ejecutar el programa y enviar el audio al FIFO
+echo "Iniciando programa y enviando audio al buffer..."
+
+#"${bin_folder}/${program_name}" "${bb_code}" "${bb_t_init}" | tee >("${pv_folder}${pv_program_name}" -f s16le -r "${bb_rate}" -c 1 -v freqwalkfitlog -t "BB" &) | "$fifo"
+
+"${bin_folder}/${program_name}" "${bb_code}" "${bb_t_init}" | tee "$fifo" | "${pv_folder}${pv_program_name}" -f s16le -r "${bb_rate}" -c 1 -v freqwalkfitlog -t "BB" &
+
+# 1. Ejecutar el programa y enviar audio al FIFO en segundo plano
+echo "Iniciando programa y buffer de audio..."
+"${bin_folder}/${program_name}" "${bb_code}" "${bb_t_init}" | tee "$fifo" | {
+    # Este bloque se ejecuta en segundo plano
+    "${pv_folder}${pv_program_name}" -f s16le -r "${bb_rate}" -c 1 -v freqwalkfitlog -t "BB"
+} &
+
+
+# 2. Esperar a que la ventana "BB" exista
+echo "Esperando a que la ventana 'BB' esté disponible..."
+while true; do
+    # Obtener Window ID y verificar si está visible
+    WINDOW_ID=$(xwininfo -name "BB" 2>/dev/null | awk '/Window id:/ {print $4}')
+    if [ -n "$WINDOW_ID" ]; then
+        # Verificar si la ventana está visible (no minimizada)
+        STATE=$(xwininfo -id "$WINDOW_ID" | awk '/Map State:/ {print $NF}')
+        if [ "$STATE" == "IsViewable" ]; then
+            break
+        fi
+    fi
+    sleep 0.1
+done
+echo "Ventana detectada con ID: $WINDOW_ID"
+
+# 3. Obtener dimensiones de la ventana
+#WIDTH=$(xwininfo -id "$WINDOW_ID" | awk '/Width:/ {print $2}')
+#HEIGHT=$(xwininfo -id "$WINDOW_ID" | awk '/Height:/ {print $2}')
+
+# 4. Forzar foco en la ventana (evitar interacción manual)
+wmctrl -i -a "$WINDOW_ID" || echo "wmctrl no instalado. Asegúrate de instalarlo: sudo apt install wmctrl"
+
+
+
+# 5. Iniciar FFmpeg
+echo "Iniciando grabación..."
+ffmpeg -hide_banner \
+    -f s16le -ar "${bb_rate}" -ac 1 -i "$fifo" \  # Audio desde FIFO
+    -f x11grab -i :0.0+windowid="$WINDOW_ID" \     # Captura de ventana
+    -i overlay_code.png \                          # Overlay
+    -filter_complex "[1:v][2:v] overlay=0:0" \     # Combinar video y overlay
+    -c:a pcm_s16le \                               # Audio sin comprimir
+    -c:v libx264 -preset ultrafast -pix_fmt yuv420p \  # Video H.264
+    -y "${filename}".mkv \                         # Salida
+    2>&1 | grep -v "deprecated" &  # Ocultar advertencias
+
+# 6. Esperar a que FFmpeg termine (opcional)
+wait
+
+# 7. Limpiar FIFO
+cleanup

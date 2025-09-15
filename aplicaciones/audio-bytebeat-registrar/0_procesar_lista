@@ -1,0 +1,49 @@
+#!/bin/bash
+
+# Separador de tiempo y cmd
+SEPARADOR="@"
+
+
+# Verificar que se proporcionó un archivo
+if [ $# -ne 1 ]; then
+    echo "Uso: $0 <archivo_comandos>"
+    exit 1
+fi
+
+archivo_comandos="$1"
+
+# Verificar que el archivo existe
+if [ ! -f "$archivo_comandos" ]; then
+    echo "Error: El archivo '$archivo_comandos' no existe."
+    exit 1
+fi
+
+
+# Leer el archivo línea por línea
+while IFS= read -r linea; do
+    # Ignorar líneas vacías o comentarios (que empiecen con #)
+    if [[ -z "$linea" || "$linea" =~ ^# ]]; then
+        continue
+    fi
+
+    # Dividir el elemento en comando y tiempo
+    IFS="$SEPARADOR" read -r tiempo cmd <<< "$linea"
+
+    echo "=> Ejecutando: $cmd (Duración: ${tiempo}s)"
+
+    # Ejecutar el comando con timeout
+    echo "-----------> $tiempo"
+    echo "-----------> $cmd"
+    timeout "${tiempo}" bash -c "${cmd}"
+
+    # Verificar si el comando terminó por timeout o por finalización normal
+    if [ $? -eq 124 ]; then
+        echo "==> Comando detenido por timeout: ${cmd}"
+    else
+        echo "==> Comando finalizado correctamente: ${cmd}"
+    fi
+
+    echo "----------------------------------------"
+done < "$archivo_comandos"
+
+echo "Todos los comandos han sido procesados."

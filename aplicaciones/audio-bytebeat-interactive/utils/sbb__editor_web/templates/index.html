@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archivos</title>
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/style-index.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5 pb-5">
+        <p class="text-center h3"><span class="text-secondary">Archivos en</span> {{ data_folder }}</p>
+        <div class="mb-3">
+            <div class="input-group">
+                <span class="input-group-text">🔍</span>
+                <input type="text" id="filter-input" class="form-control" placeholder="Filtrar archivos...">
+            </div>
+        </div>
+        <ul class="list-group" id="file-list">
+            {% for file in files %}
+            <li class="list-group-item border-0" data-name="{{ file.name }}">
+                <a href="/edit/{{ file.name }}" class="btn btn-sm btn-outline-dark">{{ file.name }}</a>
+                <span class="small ms-2 text-secondary">{{ file.size_kb }} Kb</span>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <script type="module" src="/static/js/init-index.js"></script>
+</body>
+</html>

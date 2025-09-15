@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Editor - {{ filename }}</title>
+        <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+        <link href="/static/css/style-edit.css" rel="stylesheet">
+    </head>
+    <body>
+        <div class="container mt-5 pb-5">
+            <div>
+                <div class="d-flex align-items-center">
+                    <div class="edit-label bg-dark text-white px-3 py-2 rounded-start">EDITANDO</div>
+                    <input type="text" id="filename" value="{{ filename }}" class="form-control border-start-0 rounded-end">
+                </div>
+                <hr>
+            </div>
+
+            <table class="table table-bordered mt-3">
+                <thead>
+                    <tr>
+                        <th class="text-center small">#</th>
+                        <th class="text-center small">DATA</th>
+                        <th class="text-center small">TIME</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="items">
+                    {% for item in data %}
+                    <tr class="item" data-index="{{ loop.index }}" draggable="true">
+                        <td><p class="small text-center">{{ loop.index }}</p></td>
+                        <td><input type="text" class="form-control data" value="{{ item.data }}"></td>
+                        <td><input type="number" class="form-control elapsed-time" value="{{ item.elapsed_time }}"></td>
+                        <td class="actions">
+                            <span class="btn btn-sm btn-light"><input type="checkbox" class="select-item" title="Seleccionar"></span>
+                            <button class="btn btn-sm btn-light delete" title="Eliminar">🗑</button>
+                            <button class="btn btn-sm btn-light listen" data-state="listen" title="Escuchar/Detener audio">▶</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Menú lateral -->
+        <div class="position-fixed top-0 end-0 p-3 text-center">
+
+            <div class="rounded-2 border p-1">
+                <button class="btn btn-sm" id="add" title="Agregar item"><b class="btn-add">+</b></button>
+            </div>
+
+            <br>
+            <div class="rounded-2 border p-1">
+                <button class="btn btn-sm" id="select-all" title="Seleccionar Todos">☑</button>
+                <br><button class="btn btn-sm" id="deselect-all" title="Deseleccionar Todos">◻</button>
+                <br><button class="btn btn-sm" id="invert-selection" title="Invertir Selección">↕</button>
+            </div>
+
+            <br>
+            <div class="rounded-2 border p-1">
+                <button class="btn" id="mass-delete" title="Eliminar Seleccionados">🗑</button>
+                <br><button class="btn" id="mass-update-time" title="Actualizar Tiempo">⏱️</button>
+            </div>
+
+            <br>
+            <div class="rounded-2 border p-1">
+                <button class="btn btn-sm" id="save" title="Guardar sesión">💾</button>
+            </div>
+
+            <br>
+            <div class="rounded-2 border p-1">
+                <a href="/" class="btn btn-sm" title="Listado de archivos">📂</a>
+            </div>
+
+        </div>
+
+        <script type="module" src="/static/js/init-edit.js"></script>
+    </body>
+</html>

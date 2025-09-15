@@ -1,0 +1,58 @@
+#!/bin/bash
+# -*- coding:utf-8 -*-
+
+if [[ "" == "$program_mode" ]]; then
+    echo "ERROR. Falta definir las variables 'program_mode' y 'program_name'."
+    echo
+    echo "Calculadora para expresion RPN."
+    echo "Por ejemplo ejecutando previamente:"
+    echo "    export program_name calc_i"
+    echo "    export program_mode ci"
+    echo "O empleando los scripts:"
+    echo "    ./calcular_enteros"
+    echo "    ./calcular_flotantes"
+    exit 1
+fi
+
+rpn_expr="$1"
+
+if [[ "" == "$rpn_expr" ]]; then
+    echo "ERROR. Falta la expresión rpn."
+    echo
+    echo "Calculadora para expresion RPN."
+    echo "Modo de uso:"
+    echo "    $0 <expresion_rpn> [t ...]"
+    echo
+    echo "expresion_rpn        es una expresión rpn válida obligatoria."
+    echo "t                    es una lista, opcional, de numeros que serán referenciados en la variable t de la expresión."
+    echo
+    echo "Por ejemplo:"
+    echo "    $0 't dup *' 1 2 3 4"
+    echo "o"
+    echo "    $0 '1 3 <<'"
+    exit 1
+fi
+
+shift 1 # Elimina los dos primeros argumentos ($1 y $2)
+numbers=("$@") # Almacena el resto de los argumentos en un array
+bin_folder='../../base/bin'
+
+make -C $(dirname $bin_folder) -s mode bb_modo=$program_mode
+
+# Verificar si la compilación fue exitosa
+if [ $? -ne 0 ]; then
+    echo "Error: La compilación falló."
+    exit 1
+fi
+
+if [ ${#numbers[@]} -eq 0 ]; then
+    # Evaluar expresiones sin valores adicioneales
+    result=$("${bin_folder}/${program_name}" "${rpn_expr}")
+    echo -e ".\t${result}"
+else
+    # Iterar sobre los números adicionales y ejecutar el programa para cada uno
+    for number in "${numbers[@]}"; do
+        result=$("${bin_folder}/${program_name}" "${rpn_expr}" "${number}")
+        echo -e "${number}\t${result}"
+    done
+fi

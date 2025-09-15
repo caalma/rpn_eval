@@ -1,0 +1,18 @@
+#!/bin/bash
+
+echo "Precisión de momento: HH:MM:SS.mmm"
+
+ARC="$1"
+INI="$2"
+END="$3"
+PREFIJO='final_'; if [[ "$4" != "" ]] then; PREFIJO="$4"; fi
+
+#ffmpeg -i $ARC -ss $INI -to $END -c copy "recorte_crudo__${ARC}"
+
+#ffmpeg -ss $INI -i $ARC -to $END -c copy "recorte_preciso_crudo__${ARC}"
+
+#ffmpeg -i $ARC -ss $INI -to $END  -c:v libx264 -c:a aac "recorte_preciso_mucha_perdida__${ARC}"
+
+#ffmpeg -i $ARC -ss $INI -to $END  -c:v libx264 -preset veryslow -crf 18 -c:a copy "recorte_preciso_poca_perdida__${ARC}"
+
+ffmpeg -ss $INI -i $ARC -to $END  -c:v libx264 -preset veryslow -crf 18 -c:a copy "${PREFIJO}${ARC}"

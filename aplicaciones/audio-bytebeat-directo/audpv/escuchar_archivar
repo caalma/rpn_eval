@@ -1,0 +1,57 @@
+#!/bin/bash
+# -*- coding:utf-8 -*-
+
+bb_code="$1"
+bb_t_init="$2"
+bb_rate="$3"
+bb_modo="$4"
+filename=$(./codebb-to-name "$bb_code")"--${bb_t_init}-${bb_rate}-${bb_modo}"
+
+if [[ "" == "$filename" ]]; then
+    echo -e "ERROR. Requiere varios argumentos."
+    echo
+    echo -e "Emisor de audio de estilo bytebeat, mediantes expresion RPN."
+    echo -e "Modo de uso:"
+    echo -e "    $0 <bb_code> [bb_t_init] [bb_rate] [bb_modo] [filename]"
+    echo
+    echo -e "bb_code         es una expresión rpn válida obligatoria. En dicha expresión se referencia el valor del tiempo actual en la variable t."
+    echo -e "bb_t_init       es un entero positivo para el iniciar t. Es opcional y por defecto es 0."
+    echo -e "bb_rate         es un entero positivo para setear el sample-rate. Es opcional y por defecto es 8000"
+    echo -e "bb_modo         puede ser 'i' o 'f', para indicar si se utilizará el evaluador de enteros o de punto flotante. Es opcional y por defecto es 'i'."
+    echo
+    echo -e "Por ejemplo:"
+    echo -e "    $0 't 5 >> t 7 >> - t t * &' 0 8000 i"
+    exit 1
+fi
+
+bin_folder='../../../base/bin'
+program_name='audio_rpn_i'
+program_mode='ai'
+
+pv_folder='../../../../../audpv/base/bin/'
+pv_program_name='audpv'
+
+if [[ $bb_modo == "f" ]]; then
+    program_name='audio_rpn_f'
+    program_mode='af'
+fi
+
+# datos obtenidos manualmente con ./window_data
+WIDTH=800
+HEIGHT=400
+X=283
+Y=208
+
+./overlay_generate "$bb_code"
+
+# Generar y ejecutar el comando
+echo "USANDO ---> $program_name"
+"${bin_folder}/${program_name}" "${bb_code}" "${bb_t_init}" \
+    | tee >("${pv_folder}${pv_program_name}" -f s16le -r "${bb_rate}" -c 1 -v freqwalkfitlog -t "BB") \
+    | ffmpeg -hide_banner -f s16le -ar "${bb_rate}" -ac 1 -i - \
+             -f x11grab -video_size ${WIDTH}x${HEIGHT} -i :0.0+${X},${Y} \
+             -i overlay_code.png \
+             -filter_complex "[1:v][2:v] overlay=0:0" \
+             -c:a pcm_s16le \
+             -c:v libx264 -preset veryslow -crf 18 -pix_fmt yuv420p \
+             -y "${filename}".mkv

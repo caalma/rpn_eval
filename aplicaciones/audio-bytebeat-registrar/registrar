@@ -1,0 +1,71 @@
+#!/bin/bash
+# -*- coding:utf-8 -*-
+
+# Datos para las dimensiones y posición de la ventana de visualización a capturar
+# Obtenidos manualmente con window_data sobre la ventana de nombre "BB"
+# Uso: abrir la ventana y ejecutar:
+# ./window_data "BB"
+WIDTH=800
+HEIGHT=400
+X=283
+Y=208
+
+# ARGUMENTOS
+bb_code="$1"
+bb_t_init="$2"
+bb_rate="$3"
+bb_modo="$4"
+filename=$(./codebb-to-name "$bb_code")"--${bb_t_init}-${bb_rate}-${bb_modo}"
+
+if [[ "" == "$filename" ]]; then
+    echo -e "ERROR. Requiere varios argumentos."
+    echo
+    echo -e "Emisor de audio de estilo bytebeat, mediantes expresion RPN."
+    echo -e "Modo de uso:"
+    echo -e "    $0 <bb_code> [bb_t_init] [bb_rate] [bb_modo] [filename]"
+    echo
+    echo -e "bb_code         es una expresión rpn válida obligatoria. En dicha expresión se referencia el valor del tiempo actual en la variable t."
+    echo -e "bb_t_init       es un entero positivo para el iniciar t. Es opcional y por defecto es 0."
+    echo -e "bb_rate         es un entero positivo para setear el sample-rate. Es opcional y por defecto es 8000"
+    echo -e "bb_modo         puede ser 'i' o 'f', para indicar si se utilizará el evaluador de enteros o de punto flotante. Es opcional y por defecto es 'i'."
+    echo
+    echo -e "Por ejemplo:"
+    echo -e "    $0 't 5 >> t 7 >> - t t * &' 0 8000 i"
+    exit 1
+fi
+
+# Setear software de generación de audio
+audiogen_folder='../../base/bin/'
+audiogen_name='audio_rpn_i'
+audiogen_mode='ai'
+
+if [[ $bb_modo == "f" ]]; then
+    audiogen_name='audio_rpn_f'
+    audiogen_mode='af'
+fi
+
+# Seteo de carpeta para videos
+video_folder='./videos_registrados/'
+mkdir -p "${video_folder}"
+
+# Setear software de reproducción y visualización
+pv_folder='../../../../audpv/base/bin/'
+pv_name='audpv'
+
+# Generar placa para superponer con código
+image_overlay=$(./overlay_generate "${bb_code}")
+
+# Generar audio y mediante una tubería dirigir al reproductor y registrador en video
+echo "USANDO ---> ${audiogen_name}"
+#"${audiogen_folder}/${audiogen_name}" "${bb_code}" "${bb_t_init}" \
+#    | tee >("${pv_folder}${pv_name}" -f s16le -r "${bb_rate}" -c 1 -v freqwalkfitlog -t "BB") \
+#    | ffmpeg -hide_banner -f s16le -ar "${bb_rate}" -ac 1 -i - \
+#             -f x11grab -video_size ${WIDTH}x${HEIGHT} -i :0.0+${X},${Y} \
+#             -i "${image_overlay}" \
+#             -filter_complex "[1:v][2:v] overlay=0:0" \
+#             -c:a pcm_s16le \
+#             -c:v libx264 -preset veryslow -crf 18 -pix_fmt yuv420p \
+#             -y "${video_folder}${filename}".mkv
+
+"${audiogen_folder}/${audiogen_name}" "${bb_code}" "${bb_t_init}" \
+    | ffmpeg -hide_banner -f s16le -ar "${bb_rate}" -ac 1 -i - -y "${video_folder}${filename}".wav

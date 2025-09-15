@@ -1,0 +1,76 @@
+.selected {
+    background-color: #d1e7dd; /* Verde claro */
+}
+
+
+/* Ajuste de botones con icono */
+.btn::before {
+    margin-right: 5px;
+}
+
+
+/* Estilo para la tabla */
+table {
+    width: 100%;
+    table-layout: fixed; /* Fuerza un diseño fijo para las columnas */
+}
+
+/* Ancho de cada columna */
+td:nth-child(1), th:nth-child(1) {
+    background: #666;
+    color: #fff;
+    width: 5%; /* Número de fila (pequeño) */
+}
+
+td:nth-child(2), th:nth-child(2) {
+    _width: 70%; /* Expresión (más espacio) */
+}
+
+td:nth-child(3), th:nth-child(3) {
+    width: 9%; /* Elapsed Time (más pequeño) */
+}
+
+td:nth-child(4), th:nth-child(4) {
+    width: 12%; /* Acciones (espacio suficiente para botones) */
+    background: #666;
+}
+
+/* Asegurar que el contenido no desborde */
+td, th {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.item {
+    input {
+        border: none;
+        padding: 0;
+        margin: 0;
+
+        &.data {
+            font-family: 'FiraCode', monospace;
+            font-size: 0.9em;
+        }
+
+        &[type=number] {
+            text-align: right;
+        }
+    }
+
+
+}
+
+
+/* Botón Agregar items */
+.btn-add {
+    font-size: 1.3em;
+    color: #fff;
+    background: #000;
+    border-radius: 20px;
+    width: 25px;
+    height: 25px;
+    text-align: center;
+    display: block;
+    line-height: 1.2em;
+}
