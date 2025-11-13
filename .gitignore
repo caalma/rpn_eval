@@ -1,3 +1,5 @@
 __pycache__
 venv/
 info.org
+aplicaciones/audio-bytebeat-interactive/sesiones_grabadas/*
+base/bin
